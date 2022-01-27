@@ -1,0 +1,10 @@
+from django.contrib import admin
+from django.urls import path, include
+from . import views
+from graphene_django.views import GraphQLView
+from .schema import schema
+
+urlpatterns = [
+    path('hehe/bro', views.hehe, name="hehe"),
+    path("graphql", GraphQLView.as_view(graphiql=True, schema=schema)),
+]
