@@ -17,7 +17,7 @@ import { isAuth } from '../jwt/isAuthMiddleware'
 import { MyContext } from '../types'
 
 @InputType()
-class UserCreateTempArgs {
+class UserRegisterArgs {
     @Field()
     username: string
     @Field()
@@ -27,8 +27,17 @@ class UserCreateTempArgs {
     @Field({ nullable: true })
     avatar?: string
 }
+
+@InputType()
+class UserLoginArgs {
+    @Field()
+    username: string
+    @Field()
+    password: string
+}
+
 @ObjectType()
-class UserLoginResponse {
+class UserAuthResponse {
     @Field(() => [FieldError], { nullable: true })
     errors?: FieldError[]
     @Field(() => UserClass, { nullable: true })
@@ -51,10 +60,10 @@ export class userReslover {
     async getUsers(): Promise<UserClass[]> {
         return await UserModel.find()
     }
-    @Mutation(() => UserLoginResponse)
+    @Mutation(() => UserAuthResponse)
     async userRegister(
-        @Arg('options') options: UserCreateTempArgs
-    ): Promise<UserLoginResponse> {
+        @Arg('options') options: UserRegisterArgs
+    ): Promise<UserAuthResponse> {
         const { username, email, password } = options
         if (username.length < 2) {
             return {
@@ -98,6 +107,38 @@ export class userReslover {
             }
         }
         console.log(user)
+        return {
+            user,
+            accessToken: createAcessToken(user)
+        }
+    }
+    @Mutation(() => UserAuthResponse)
+    async userLogin(@Arg('options') options: UserLoginArgs) {
+        const user = await UserModel.findOne({
+            username: options.username
+        }).select('+password')
+        if (!user) {
+            return {
+                errors: [
+                    {
+                        field: 'username',
+                        message: 'bruv that account doesnt exist'
+                    }
+                ]
+            }
+        }
+        console.log(user)
+        const valid = await argon.verify(user.password, options.password)
+        if (!valid) {
+            return {
+                errors: [
+                    {
+                        field: 'password',
+                        message: 'PASSWORD is wrong bruv :|'
+                    }
+                ]
+            }
+        }
         return {
             user,
             accessToken: createAcessToken(user)

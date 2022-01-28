@@ -16,7 +16,7 @@ export class UserClass {
     public email: string
 
     @prop({ required: true, select: false })
-    private password: string
+    public password: string
 
     @prop({ required: false })
     @Field({ nullable: true })

@@ -5,7 +5,6 @@ import express from 'express'
 import mongoose from 'mongoose'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
-import joiful from 'joiful'
 
 import { firstResolver, userReslover } from './resolvers'
 import { TypegooseMiddleware } from './typegoose-middleware'
