@@ -158,6 +158,6 @@ export class userReslover {
     @UseMiddleware(isAuth)
     test(@Ctx() { payload }: MyContext) {
         console.log(payload)
-        return `${payload?.userId}`
+        return `${payload?.user}`
     }
 }

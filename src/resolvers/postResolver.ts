@@ -4,6 +4,7 @@ import { PostModel } from '../models'
 import { isAuth } from '../jwt/isAuthMiddleware'
 import { MyContext } from '../types'
 import { PostClass } from '../models/Post'
+import { UserClass } from '../models/User'
 
 @Resolver(_ => PostModel)
 export class postReslover {
@@ -12,10 +13,10 @@ export class postReslover {
         return await PostModel.find()
     }
 
-    @Query(() => String)
+    @Query(() => UserClass)
     @UseMiddleware(isAuth)
     postAuth(@Ctx() { payload }: MyContext) {
         console.log(payload)
-        return `${payload?.userId}`
+        return payload?.user
     }
 }
