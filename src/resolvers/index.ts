@@ -1,3 +1,3 @@
 import { firstResolver } from './test'
-
-export { firstResolver }
+import { userReslover } from './userResolver'
+export { firstResolver, userReslover }

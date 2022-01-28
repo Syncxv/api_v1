@@ -1,23 +1,24 @@
-import { Schema, model } from 'mongoose'
-export interface UserType {
-    id: string
-    _id: any
-    username: string
-    password: string
-    discriminator: number
-    email: string
-    avatar?: string
+import { prop, getModelForClass } from '@typegoose/typegoose'
+import { Field, ObjectType } from 'type-graphql'
+@ObjectType()
+export class UserClass {
+    @prop({ required: true })
+    @Field()
+    public username: string
+
+    @prop({ required: true })
+    @Field()
+    public email: string
+
+    @prop({ required: true, select: false })
+    @Field()
+    private password: string
+
+    @prop()
+    @Field()
+    public avatar?: string
 }
 
-export const User = new Schema<UserType>(
-    {
-        username: { type: String, required: true },
-        email: { type: String, required: true },
-        discriminator: { type: Number },
-        password: { required: true, type: String, select: false },
-        avatar: { type: String, default: null }
-    },
-    { timestamps: true }
-)
+export const UserModel = getModelForClass(UserClass)
 
-export default model('User', User)
+// "document" has proper types of KittenClass
