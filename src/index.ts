@@ -1,12 +1,17 @@
 import 'reflect-metadata'
 import express from 'express'
+import mongoose from 'mongoose'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 
 import { firstResolver } from './resolvers'
-const PORT = 8000
+const PORT = process.env.PORT || 8000
 const main = async () => {
     const app = express()
+    mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/sma')
+    const db = mongoose.connection
+    db.on('error', err => console.error(err))
+    db.on('open', () => console.log('CONNECTED :D'))
     const apollo = new ApolloServer({
         schema: await buildSchema({
             resolvers: [firstResolver],
