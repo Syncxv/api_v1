@@ -1,5 +1,4 @@
 import { prop, getModelForClass } from '@typegoose/typegoose'
-import joiful from 'joiful'
 import { Field, ObjectType } from 'type-graphql'
 
 @ObjectType()

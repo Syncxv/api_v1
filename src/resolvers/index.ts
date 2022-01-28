@@ -1,3 +1,4 @@
 import { firstResolver } from './test'
 import { userReslover } from './userResolver'
-export { firstResolver, userReslover }
+import { postReslover } from './postResolver'
+export default { firstResolver, userReslover, postReslover }

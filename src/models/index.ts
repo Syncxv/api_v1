@@ -1,3 +1,3 @@
 import { UserModel } from './User.js'
-
-export { UserModel }
+import { PostModel } from './Post.js'
+export { UserModel, PostModel }

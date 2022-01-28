@@ -6,7 +6,7 @@ import mongoose from 'mongoose'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 
-import { firstResolver, userReslover } from './resolvers'
+import resolvers from './resolvers'
 import { TypegooseMiddleware } from './typegoose-middleware'
 
 const PORT = process.env.PORT || 8000
@@ -18,7 +18,7 @@ const main = async () => {
     db.on('open', () => console.log('CONNECTED :D'))
     const apollo = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [firstResolver, userReslover],
+            resolvers: Object.values(resolvers) as any,
             globalMiddlewares: [TypegooseMiddleware],
             validate: false
         }),
