@@ -5,6 +5,7 @@ import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 
 import { firstResolver, userReslover } from './resolvers'
+import { TypegooseMiddleware } from './typegoose-middleware'
 
 const PORT = process.env.PORT || 8000
 const main = async () => {
@@ -16,6 +17,7 @@ const main = async () => {
     const apollo = new ApolloServer({
         schema: await buildSchema({
             resolvers: [firstResolver, userReslover],
+            globalMiddlewares: [TypegooseMiddleware],
             validate: false
         }),
         context: ({ req, res }) => ({ req, res })
