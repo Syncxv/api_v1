@@ -4,5 +4,5 @@ import { UserClass } from './models/User'
 export type MyContext = {
     req: Request
     res: Response
-    payload?: { user: UserClass }
+    payload: { user: UserClass }
 }

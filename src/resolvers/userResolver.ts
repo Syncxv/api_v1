@@ -9,7 +9,7 @@ import {
     UseMiddleware
 } from 'type-graphql'
 import { UserModel } from '../models'
-import { UserClass } from '../models/User'
+import { Follower, UserClass } from '../models/User'
 import { Arg } from 'type-graphql'
 import argon from 'argon2'
 import { createAcessToken } from '../jwt'
@@ -47,9 +47,22 @@ class UserAuthResponse {
 }
 
 @ObjectType()
+class FollowRequestResponse {
+    @Field(() => [GenericError], { nullable: true })
+    errors?: GenericError[]
+    @Field(() => UserClass, { nullable: true })
+    user?: UserClass
+}
+@ObjectType()
 class FieldError {
     @Field()
     field: string
+    @Field()
+    message: string
+}
+
+@ObjectType()
+class GenericError {
     @Field()
     message: string
 }
@@ -166,6 +179,42 @@ export class userReslover {
         return false
     }
 
+    @Mutation(() => FollowRequestResponse)
+    @UseMiddleware(isAuth)
+    async follow(
+        @Ctx() { payload }: MyContext,
+        @Arg('user_id') userId: string
+    ): Promise<FollowRequestResponse> {
+        const requestedUser = await UserModel.findById(userId)
+        if (!requestedUser) {
+            return {
+                errors: [
+                    {
+                        message: 'WHO IS THAT BRUV'
+                    }
+                ]
+            }
+        }
+        if (
+            requestedUser.followers.find(
+                (s: any) => s._id.toString() === payload.user._id
+            )
+        )
+            return {
+                errors: [
+                    {
+                        message: 'bruv you cant follow twice'
+                    }
+                ]
+            }
+        requestedUser.followers.push(payload!.user._id)
+        return {
+            user: await requestedUser.populate({
+                path: 'followers',
+                select: ['username', 'id']
+            })
+        }
+    }
     @Query(() => String)
     @UseMiddleware(isAuth)
     test(@Ctx() { payload }: MyContext) {

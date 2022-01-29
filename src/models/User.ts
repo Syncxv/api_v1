@@ -1,4 +1,4 @@
-import { prop, getModelForClass } from '@typegoose/typegoose'
+import { prop, getModelForClass, Ref } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ObjectType } from 'type-graphql'
 
@@ -22,9 +22,22 @@ export class UserClass extends TimeStamps {
     @Field({ nullable: true })
     public avatar?: string
 
+    @prop({ ref: () => UserClass, default: [] })
+    @Field(() => [Follower])
+    public followers: Ref<UserClass>[]
+
     @prop({ required: false, default: false })
     @Field()
     public isStaff: boolean
 }
 
 export const UserModel = getModelForClass(UserClass)
+
+@ObjectType()
+export class Follower {
+    @Field()
+    readonly _id: string
+
+    @Field()
+    public username: string
+}
