@@ -4,7 +4,7 @@
     "main": "index.js",
     "scripts": {
         "watch": "tsc -w",
-        "_dev": "nodemon dist/index.js --inspect",
+        "_dev": "nodemon --inspect dist/index.js",
         "dev": "concurrently --kill-others \"npm run watch\" \"npm run _dev\""
     },
     "repository": "https://github.com/Syncxv/api_v1_django.git",

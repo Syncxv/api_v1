@@ -87,6 +87,18 @@ export class userReslover {
                 ]
             }
         }
+        const heheUserEnail = await UserModel.findOne({ email })
+        if (heheUserEnail) {
+            return {
+                errors: [
+                    {
+                        field: 'email',
+                        message: 'AYO EMAIL already taken dawg'
+                    }
+                ]
+            }
+        }
+        //TODO: like wtf is above me :| CLEAN THIS TRASH
         const hash = await argon.hash(password)
         const user = await UserModel.create({
             username,

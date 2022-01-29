@@ -1,16 +1,18 @@
-import { prop, getModelForClass } from '@typegoose/typegoose'
+import { prop, getModelForClass, Ref } from '@typegoose/typegoose'
 import { Field, ObjectType } from 'type-graphql'
+import { PostModel } from '.'
+import { PostClass } from './Post'
 
 @ObjectType()
 export class UserClass {
     @Field()
     readonly _id: string
 
-    @prop({ required: true, unique: true })
+    @prop({ required: true })
     @Field()
     public username: string
 
-    @prop({ required: true, unique: true })
+    @prop({ required: true })
     @Field()
     public email: string
 
