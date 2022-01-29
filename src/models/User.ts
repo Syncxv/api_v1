@@ -1,10 +1,9 @@
-import { prop, getModelForClass, Ref } from '@typegoose/typegoose'
+import { prop, getModelForClass } from '@typegoose/typegoose'
+import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ObjectType } from 'type-graphql'
-import { PostModel } from '.'
-import { PostClass } from './Post'
 
 @ObjectType()
-export class UserClass {
+export class UserClass extends TimeStamps {
     @Field()
     readonly _id: string
 
@@ -22,6 +21,10 @@ export class UserClass {
     @prop({ required: false })
     @Field({ nullable: true })
     public avatar?: string
+
+    @prop({ required: false, default: false })
+    @Field()
+    public isStaff: boolean
 }
 
 export const UserModel = getModelForClass(UserClass)

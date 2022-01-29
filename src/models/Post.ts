@@ -1,9 +1,10 @@
 import { prop, getModelForClass, Ref } from '@typegoose/typegoose'
+import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ObjectType } from 'type-graphql'
 import { UserClass } from './User'
 
 @ObjectType()
-export class PostClass {
+export class PostClass extends TimeStamps {
     @Field()
     readonly _id: string
 
