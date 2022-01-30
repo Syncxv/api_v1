@@ -1,5 +1,15 @@
-import { prop, getModelForClass, Ref } from '@typegoose/typegoose'
+import {
+    prop,
+    getModelForClass,
+    Ref,
+    ReturnModelType
+} from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
+import {
+    BeAnObject,
+    IObjectWithTypegooseFunction
+} from '@typegoose/typegoose/lib/types'
+import { Document } from 'mongoose'
 import { Field, ObjectType } from 'type-graphql'
 import { CommentClass } from './Comment'
 import { UserClass } from './User'
@@ -39,6 +49,46 @@ export class PostClass extends TimeStamps {
     })
     @Field(() => [CommentClass])
     public comments: Ref<CommentClass>[]
+
+    public static async findAndPopulate(
+        this: ReturnModelType<typeof PostClass>
+    ) {
+        return this.find()
+            .populate({
+                path: 'owner'
+            })
+            .populate({ path: 'comments', populate: { path: 'author' } })
+    }
+    public static async findByIdAndPopulate(
+        this: ReturnModelType<typeof PostClass>,
+        id: string
+    ) {
+        return this.findById(id)
+            .populate({
+                path: 'owner'
+            })
+            .populate({ path: 'comments', populate: { path: 'author' } })
+    }
+
+    public static async populateModel(
+        this: ReturnModelType<typeof PostClass>,
+        post: Document<string, BeAnObject, any> &
+            PostClass &
+            IObjectWithTypegooseFunction & {
+                _id: string
+            }
+    ) {
+        return (
+            await post.populate({
+                path: 'owner'
+            })
+        ).populate({
+            path: 'comments',
+            populate: { path: 'author' }
+        })
+    }
 }
 
-export const PostModel = getModelForClass(PostClass)
+export const PostModel = getModelForClass(PostClass, {
+    schemaOptions: { timestamps: true }
+})
