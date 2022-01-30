@@ -1,17 +1,12 @@
 import { prop, getModelForClass, Ref } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ObjectType } from 'type-graphql'
-import { CommentClass } from './Comment'
 import { UserClass } from './User'
 
 @ObjectType()
-export class PostClass extends TimeStamps {
+export class CommentClass extends TimeStamps {
     @Field()
     readonly _id: string
-
-    @prop({ required: true })
-    @Field()
-    public title: string
 
     @prop({ required: true })
     @Field()
@@ -28,17 +23,7 @@ export class PostClass extends TimeStamps {
         required: true
     })
     @Field(() => UserClass)
-    public owner: Ref<UserClass>
-
-    @prop({
-        ref: () => CommentClass,
-        default: [],
-        unique: false,
-        sparse: true,
-        required: true
-    })
-    @Field(() => [CommentClass])
-    public comments: Ref<CommentClass>[]
+    public author: Ref<UserClass>
 }
 
-export const PostModel = getModelForClass(PostClass)
+export const CommentModel = getModelForClass(CommentClass)

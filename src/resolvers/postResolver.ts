@@ -16,6 +16,7 @@ import { MyContext } from '../types'
 import { PostClass } from '../models/Post'
 import { UserClass } from '../models/User'
 import { GenericError } from './userResolver'
+import { CommentClass, CommentModel } from '../models/Comment'
 
 @InputType()
 class CreatePostArgs {
@@ -27,6 +28,14 @@ class CreatePostArgs {
 
 @ObjectType()
 class DeletePostResponse {
+    @Field(() => [GenericError], { nullable: true })
+    errors?: GenericError[]
+    @Field(() => PostClass, { nullable: true })
+    post?: PostClass
+}
+
+@ObjectType()
+class AddCommentResponse {
     @Field(() => [GenericError], { nullable: true })
     errors?: GenericError[]
     @Field(() => PostClass, { nullable: true })
@@ -78,6 +87,39 @@ export class postReslover {
         await post.delete()
         return {
             post
+        }
+    }
+    @Mutation(() => AddCommentResponse)
+    @UseMiddleware(isAuth)
+    async addComment(
+        @Ctx() { payload }: MyContext,
+        @Arg('content') content: string,
+        @Arg('post_id') postId: string
+    ): Promise<AddCommentResponse> {
+        if (!content.length)
+            return { errors: [{ message: 'ayooo thats an empty comment' }] }
+        const post = await PostModel.findById(postId).populate({
+            path: 'owner'
+        })
+        if (!post)
+            return {
+                errors: [{ message: 'WHAT POST IS THAT?' }]
+            }
+        const comment = await CommentModel.create({
+            content,
+            author: payload.user._id
+        })
+        post.comments.push(comment)
+        console.log(post, comment)
+        ;(global as any).post = post
+        ;(global as any).comment = comment
+        await comment.save()
+        await post.save()
+        return {
+            post: await post.populate({
+                path: 'comments',
+                populate: { path: 'author' }
+            })
         }
     }
 
