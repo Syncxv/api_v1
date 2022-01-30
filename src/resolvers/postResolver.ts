@@ -35,7 +35,7 @@ class DeletePostResponse {
 }
 
 @ObjectType()
-class AddCommentResponse {
+class CommentResponse {
     @Field(() => [GenericError], { nullable: true })
     errors?: GenericError[]
     @Field(() => PostClass, { nullable: true })
@@ -46,7 +46,7 @@ class AddCommentResponse {
 export class postReslover {
     @Query(() => [PostClass])
     async getPosts(): Promise<PostClass[]> {
-        return await PostModel.find().populate({ path: 'owner' })
+        return await PostModel.findAndPopulate()
     }
 
     @Mutation(() => PostClass)
@@ -73,9 +73,7 @@ export class postReslover {
         @Arg('post_id') postId: string
     ): Promise<DeletePostResponse> {
         console.log(payload)
-        const post = await PostModel.findById(postId).populate({
-            path: 'owner'
-        })
+        const post = await PostModel.findByIdAndPopulate(postId)
         if (!post)
             return {
                 errors: [{ message: 'WHAT POST IS THAT?' }]
@@ -89,18 +87,16 @@ export class postReslover {
             post
         }
     }
-    @Mutation(() => AddCommentResponse)
+    @Mutation(() => CommentResponse)
     @UseMiddleware(isAuth)
     async addComment(
         @Ctx() { payload }: MyContext,
         @Arg('content') content: string,
         @Arg('post_id') postId: string
-    ): Promise<AddCommentResponse> {
+    ): Promise<CommentResponse> {
         if (!content.length)
             return { errors: [{ message: 'ayooo thats an empty comment' }] }
-        const post = await PostModel.findById(postId).populate({
-            path: 'owner'
-        })
+        const post = await PostModel.findByIdAndPopulate(postId)
         if (!post)
             return {
                 errors: [{ message: 'WHAT POST IS THAT?' }]
@@ -116,13 +112,27 @@ export class postReslover {
         await comment.save()
         await post.save()
         return {
-            post: await post.populate({
-                path: 'comments',
-                populate: { path: 'author' }
-            })
+            post: await PostModel.populateModel(post)
         }
     }
 
+    @Mutation(() => CommentResponse)
+    @UseMiddleware(isAuth)
+    async deleteComment(
+        @Ctx() { payload }: MyContext,
+        @Arg('comment_id') commentId: string,
+        @Arg('post_id') postId: string
+    ): Promise<CommentResponse> {
+        const post = await PostModel.findOneAndUpdate(
+            { id: postId },
+            { $pull: { comments: commentId } }
+        )
+        const populated = await PostModel.populateModel(post!)
+        console.log(populated)
+        return {
+            post: populated
+        }
+    }
     @Query(() => UserClass)
     @UseMiddleware(isAuth)
     postAuth(@Ctx() { payload }: MyContext) {
