@@ -26,4 +26,6 @@ export class CommentClass extends TimeStamps {
     public author: Ref<UserClass>
 }
 
-export const CommentModel = getModelForClass(CommentClass)
+export const CommentModel = getModelForClass(CommentClass, {
+    schemaOptions: { timestamps: true }
+})
