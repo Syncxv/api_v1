@@ -8,7 +8,7 @@ import { buildSchema } from 'type-graphql'
 
 import resolvers from './resolvers'
 import { TypegooseMiddleware } from './typegoose-middleware'
-
+import { PostModel, CommentModel, UserModel } from './models'
 const PORT = process.env.PORT || 8000
 const main = async () => {
     const app = express()
@@ -16,6 +16,9 @@ const main = async () => {
     const db = mongoose.connection
     db.on('error', err => console.error(err))
     db.on('open', () => console.log('CONNECTED :D'))
+    ;(global as any).PostModel = PostModel
+    ;(global as any).CommentModel = CommentModel
+    ;(global as any).UserModel = UserModel
     const apollo = new ApolloServer({
         schema: await buildSchema({
             resolvers: Object.values(resolvers) as any,
