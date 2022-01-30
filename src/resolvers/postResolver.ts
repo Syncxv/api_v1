@@ -4,6 +4,7 @@ import {
     Field,
     InputType,
     Mutation,
+    ObjectType,
     Query,
     Resolver,
     UseMiddleware
@@ -14,6 +15,7 @@ import { isAuth } from '../jwt/isAuthMiddleware'
 import { MyContext } from '../types'
 import { PostClass } from '../models/Post'
 import { UserClass } from '../models/User'
+import { GenericError } from './userResolver'
 
 @InputType()
 class CreatePostArgs {
@@ -23,11 +25,19 @@ class CreatePostArgs {
     content: string
 }
 
+@ObjectType()
+class DeletePostResponse {
+    @Field(() => [GenericError], { nullable: true })
+    errors?: GenericError[]
+    @Field(() => PostClass, { nullable: true })
+    post?: PostClass
+}
+
 @Resolver(_ => PostModel)
 export class postReslover {
     @Query(() => [PostClass])
     async getPosts(): Promise<PostClass[]> {
-        return await PostModel.find()
+        return await PostModel.find().populate({ path: 'owner' })
     }
 
     @Mutation(() => PostClass)
@@ -45,6 +55,30 @@ export class postReslover {
             })
         ).save()
         return await post.populate({ path: 'owner' })
+    }
+
+    @Mutation(() => DeletePostResponse)
+    @UseMiddleware(isAuth)
+    async deletePost(
+        @Ctx() { payload }: MyContext,
+        @Arg('post_id') postId: string
+    ): Promise<DeletePostResponse> {
+        console.log(payload)
+        const post = await PostModel.findById(postId).populate({
+            path: 'owner'
+        })
+        if (!post)
+            return {
+                errors: [{ message: 'WHAT POST IS THAT?' }]
+            }
+        console.log(post)
+        if ((post!.owner as UserClass)._id.toString() !== payload.user._id) {
+            return { errors: [{ message: 'ayo this aint your post' }] }
+        }
+        await post.delete()
+        return {
+            post
+        }
     }
 
     @Query(() => UserClass)

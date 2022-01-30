@@ -54,7 +54,7 @@ class FollowRequestResponse {
     user?: UserClass
 }
 @ObjectType()
-class FieldError {
+export class FieldError {
     @Field()
     field: string
     @Field()
@@ -62,7 +62,7 @@ class FieldError {
 }
 
 @ObjectType()
-class GenericError {
+export class GenericError {
     @Field()
     message: string
 }
