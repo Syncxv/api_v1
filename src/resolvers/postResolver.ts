@@ -123,10 +123,30 @@ export class postReslover {
         @Arg('comment_id') commentId: string,
         @Arg('post_id') postId: string
     ): Promise<CommentResponse> {
-        const post = await PostModel.findOneAndUpdate(
-            { id: postId },
-            { $pull: { comments: commentId } }
+        ;(global as any).payload = payload
+        ;(global as any).commentId = commentId
+        ;(global as any).postId = postId
+        const post = await PostModel.findByIdAndPopulate(postId)
+        if (!post) return { errors: [{ message: 'bruv that post dont exist' }] }
+        ;(global as any).post = post
+        const shit = (post.comments as CommentClass[]).find(
+            (s: CommentClass) =>
+                (s!.author as UserClass)._id.toString() === payload.user._id &&
+                s._id.toString() === commentId
         )
+        console.log(shit)
+        if (!shit) {
+            return {
+                errors: [
+                    {
+                        message:
+                            'ayo either this aint your comment or its the wrong post id or THE COMMENT IS ALREDY DELETED :O'
+                    }
+                ]
+            }
+        }
+        await post.update({ $pull: { comments: commentId } })
+        await post.save()
         const populated = await PostModel.populateModel(post!)
         console.log(populated)
         return {
