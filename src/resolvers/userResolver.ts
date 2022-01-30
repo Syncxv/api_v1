@@ -9,7 +9,7 @@ import {
     UseMiddleware
 } from 'type-graphql'
 import { UserModel } from '../models'
-import { Follower, UserClass } from '../models/User'
+import { UserClass } from '../models/User'
 import { Arg } from 'type-graphql'
 import argon from 'argon2'
 import { createAcessToken } from '../jwt'
@@ -71,7 +71,10 @@ class GenericError {
 export class userReslover {
     @Query(() => [UserClass])
     async getUsers(): Promise<UserClass[]> {
-        return await UserModel.find()
+        return await UserModel.find().populate({
+            path: 'followers',
+            select: ['username', 'id']
+        })
     }
     @Mutation(() => UserAuthResponse)
     async userRegister(
@@ -195,6 +198,15 @@ export class userReslover {
                 ]
             }
         }
+        if (requestedUser?._id.toString() === payload.user._id) {
+            return {
+                errors: [
+                    {
+                        message: 'YOU THINK YOU CAN FOLLOW YOUR SELF?'
+                    }
+                ]
+            }
+        }
         if (
             requestedUser.followers.find(
                 (s: any) => s._id.toString() === payload.user._id
@@ -208,11 +220,30 @@ export class userReslover {
                 ]
             }
         requestedUser.followers.push(payload!.user._id)
+        await requestedUser.save()
         return {
             user: await requestedUser.populate({
                 path: 'followers',
                 select: ['username', 'id']
             })
+        }
+    }
+    @Mutation(() => FollowRequestResponse)
+    @UseMiddleware(isAuth)
+    async unfollow(
+        @Ctx() { payload }: MyContext,
+        @Arg('user_id') userId: string
+    ): Promise<FollowRequestResponse> {
+        const user = await UserModel.findById(userId).populate({
+            path: 'followers'
+        })
+        if (!user) {
+            return { errors: [{ message: 'who is that eh' }] }
+        }
+        await user.update({ $pull: { followers: payload.user._id } })
+        await user.save()
+        return {
+            user: user
         }
     }
     @Query(() => String)
