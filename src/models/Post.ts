@@ -23,6 +23,10 @@ export class PostClass extends TimeStamps {
     @Field()
     public title: string
 
+    @prop({ required: false })
+    @Field({ nullable: true })
+    public attachment: string
+
     @prop({ required: true })
     @Field()
     public content: string
