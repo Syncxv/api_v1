@@ -11,12 +11,13 @@ import resolvers from './resolvers'
 import { TypegooseMiddleware } from './typegoose-middleware'
 import { PostModel, CommentModel, UserModel } from './models'
 import { graphqlUploadExpress } from 'graphql-upload'
-import { corsOptions } from './types'
+import path from 'path'
 const PORT = process.env.PORT || 8000
 const main = async () => {
     const app = express()
-    app.use(graphqlUploadExpress({ maxFileSize: 10000, maxFiles: 10 }))
-    app.use(cors(corsOptions))
+    app.use(express.static(path.join('public')))
+    app.use(graphqlUploadExpress({ maxFileSize: 8000000, maxFiles: 10 }))
+    app.use(cors())
     mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/sma')
     const db = mongoose.connection
     db.on('error', err => console.error(err))
@@ -24,6 +25,7 @@ const main = async () => {
     ;(global as any).PostModel = PostModel
     ;(global as any).CommentModel = CommentModel
     ;(global as any).UserModel = UserModel
+    ;(global as any).path = path
     const apollo = new ApolloServer({
         schema: await buildSchema({
             resolvers: Object.values(resolvers) as any,

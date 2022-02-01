@@ -9,7 +9,8 @@ export type MyContext = {
 
 export const whitelist = [
     'http://localhost:3000',
-    'https://studio.apollographql.com'
+    'https://studio.apollographql.com',
+    '*'
 ]
 export const corsOptions = {
     origin: function (origin: any, callback: any) {
