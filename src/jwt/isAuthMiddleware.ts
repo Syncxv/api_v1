@@ -8,7 +8,10 @@ export const isAuth: MiddlewareFn<MyContext> = async ({ context }, next) => {
         throw new Error('no authorization token')
     }
     try {
-        const payload = verify(auth, process.env.ACCESS_TOKEN_SECRET!)
+        const payload = verify(
+            auth.split(' ')[1],
+            process.env.ACCESS_TOKEN_SECRET!
+        )
         context.payload = payload as any
     } catch (err) {
         console.log(err)
