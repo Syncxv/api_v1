@@ -246,10 +246,10 @@ export class userReslover {
             user: user
         }
     }
-    @Query(() => String)
+    @Query(() => UserClass)
     @UseMiddleware(isAuth)
-    test(@Ctx() { payload }: MyContext) {
+    async me(@Ctx() { payload }: MyContext): Promise<UserClass> {
         console.log(payload)
-        return `${payload?.user}`
+        return payload.user
     }
 }
