@@ -17,6 +17,8 @@ import { PostClass } from '../models/Post'
 import { UserClass } from '../models/User'
 import { GenericError } from './userResolver'
 import { CommentClass, CommentModel } from '../models/Comment'
+import { FileUpload, GraphQLUpload } from 'graphql-upload'
+import { saveImage } from '../utils/saveImage'
 
 @InputType()
 class CreatePostArgs {
@@ -24,6 +26,9 @@ class CreatePostArgs {
     title: string
     @Field()
     content: string
+    @Field(() => GraphQLUpload, { nullable: true })
+    image?: FileUpload
+    //ill do video later maybe if i feel like it
 }
 
 @ObjectType()
@@ -52,18 +57,30 @@ export class postReslover {
     @Mutation(() => PostClass)
     @UseMiddleware(isAuth)
     async createPost(
-        @Ctx() { payload }: MyContext,
+        @Ctx() ctx: MyContext,
         @Arg('options') options: CreatePostArgs
     ): Promise<PostClass> {
-        console.log(payload)
+        if (options.image) {
+            const imageUrl = saveImage(options.image, ctx)
+            const post = await (
+                await PostModel.create({
+                    title: options.title,
+                    content: options.content,
+                    owner: ctx.payload.user._id,
+                    image: imageUrl
+                })
+            ).save()
+            return await PostModel.populateModel(post)
+        }
         const post = await (
             await PostModel.create({
                 title: options.title,
                 content: options.content,
-                owner: payload!.user._id
+                owner: ctx.payload.user._id,
+                image: ''
             })
         ).save()
-        return await post.populate({ path: 'owner' })
+        return await PostModel.populateModel(post)
     }
 
     @Mutation(() => DeletePostResponse)
