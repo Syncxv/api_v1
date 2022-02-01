@@ -7,6 +7,13 @@ export type MyContext = {
     payload: { user: UserClass }
 }
 
+export enum Feilds {
+    USERNAME = 'username',
+    PASSWORD = 'password',
+    EMAIL = 'email',
+    UNKOWN = 'unkown'
+}
+
 export const whitelist = [
     'http://localhost:3000',
     'https://studio.apollographql.com',

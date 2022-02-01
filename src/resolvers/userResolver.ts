@@ -14,7 +14,7 @@ import { Arg } from 'type-graphql'
 import argon from 'argon2'
 import { createAcessToken } from '../jwt'
 import { isAuth } from '../jwt/isAuthMiddleware'
-import { MyContext } from '../types'
+import { Feilds, MyContext } from '../types'
 
 @InputType()
 class UserRegisterArgs {
@@ -56,7 +56,7 @@ class FollowRequestResponse {
 @ObjectType()
 export class FieldError {
     @Field()
-    field: string
+    field: Feilds
     @Field()
     message: string
 }
@@ -85,7 +85,7 @@ export class userReslover {
             return {
                 errors: [
                     {
-                        field: 'username',
+                        field: Feilds.USERNAME,
                         message:
                             'AYO make it longer than that. At least 3 characters'
                     }
@@ -97,7 +97,7 @@ export class userReslover {
             return {
                 errors: [
                     {
-                        field: 'username',
+                        field: Feilds.USERNAME,
                         message: 'AYO USERNAME already taken dawg'
                     }
                 ]
@@ -108,7 +108,7 @@ export class userReslover {
             return {
                 errors: [
                     {
-                        field: 'email',
+                        field: Feilds.USERNAME,
                         message: 'AYO EMAIL already taken dawg'
                     }
                 ]
@@ -128,7 +128,7 @@ export class userReslover {
             return {
                 errors: [
                     {
-                        field: 'unkown',
+                        field: Feilds.UNKOWN,
                         message: err.message
                     }
                 ]
