@@ -24,6 +24,7 @@ export class imageResolver {
         if (!fs.existsSync(userDir)) {
             fs.mkdirSync(userDir)
         }
+        const { ext, name } = path.parse(filename)
         const pathName = path.join(
             __dirname,
             '..',
@@ -31,7 +32,7 @@ export class imageResolver {
             'public',
             'images',
             user._id,
-            `${filename}-${new Date().getTime()}`
+            `${name}-${new Date().getTime()}${ext}`
         )
         await createReadStream().pipe(fs.createWriteStream(pathName))
         return true
