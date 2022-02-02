@@ -58,16 +58,19 @@ export class postReslover {
     @UseMiddleware(isAuth)
     async createPost(
         @Ctx() ctx: MyContext,
-        @Arg('options') options: CreatePostArgs
+        @Arg('options') options: CreatePostArgs,
+        @Arg('image', () => GraphQLUpload)
+        image?: FileUpload
     ): Promise<PostClass> {
-        if (options.image) {
-            const imageUrl = saveImage(options.image, ctx)
+        console.log(image)
+        if (image) {
+            const imageUrl = await saveImage(image, ctx)
             const post = await (
                 await PostModel.create({
                     title: options.title,
                     content: options.content,
                     owner: ctx.payload.user._id,
-                    image: imageUrl
+                    attachment: imageUrl
                 })
             ).save()
             return await PostModel.populateModel(post)
@@ -77,7 +80,7 @@ export class postReslover {
                 title: options.title,
                 content: options.content,
                 owner: ctx.payload.user._id,
-                image: ''
+                image: null
             })
         ).save()
         return await PostModel.populateModel(post)

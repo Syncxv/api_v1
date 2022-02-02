@@ -4,6 +4,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { MyContext } from '../types'
 import { apiUrl } from '../constants'
+import { randomBytes } from 'node:crypto'
 
 export const saveImage = async (
     { filename, createReadStream }: FileUpload,
@@ -21,6 +22,7 @@ export const saveImage = async (
         if (!fs.existsSync(userDir)) {
             fs.mkdirSync(userDir)
         }
+        if (!filename) filename = randomBytes(4).toString('hex')
         const { ext, name } = path.parse(filename)
         const realFileName = `${name}-${new Date().getTime()}${ext}`
         const pathName = path.join(

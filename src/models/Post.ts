@@ -20,8 +20,8 @@ export class PostClass extends TimeStamps {
     readonly _id: string
 
     @prop({ required: true })
-    @Field()
-    public title: string
+    @Field({ nullable: true })
+    public title?: string
 
     @prop({ required: false })
     @Field({ nullable: true })
