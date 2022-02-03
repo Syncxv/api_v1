@@ -40,6 +40,14 @@ class DeletePostResponse {
 }
 
 @ObjectType()
+class LikePostResponse {
+    @Field(() => [GenericError], { nullable: true })
+    errors?: GenericError[]
+    @Field(() => PostClass, { nullable: true })
+    post?: PostClass
+}
+
+@ObjectType()
 class CommentResponse {
     @Field(() => [GenericError], { nullable: true })
     errors?: GenericError[]
@@ -171,6 +179,30 @@ export class postReslover {
         console.log(populated)
         return {
             post: populated
+        }
+    }
+    @Mutation(() => LikePostResponse)
+    @UseMiddleware(isAuth)
+    async likePost(
+        @Ctx() { payload: { user } }: MyContext,
+        @Arg('post_id') postId: string
+    ): Promise<LikePostResponse> {
+        const post = await PostModel.findById(postId)
+        if (!post) return { errors: [{ message: 'that post doesnt exist' }] }
+        const isLiked = post.likedUsers.includes(user._id)
+        if (isLiked) {
+            await post.update({
+                $pull: {
+                    likedUsers: user._id
+                }
+            })
+            return {
+                post: await PostModel.populateModel(post)
+            }
+        }
+        await post.update({ $push: { likedUsers: user._id } })
+        return {
+            post: await PostModel.populateModel(post)
         }
     }
     @Query(() => UserClass)

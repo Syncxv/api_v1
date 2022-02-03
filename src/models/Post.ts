@@ -35,6 +35,10 @@ export class PostClass extends TimeStamps {
     @Field()
     public likes: number
 
+    @prop({ ref: () => UserClass, required: false, default: [] })
+    @Field(() => [String])
+    public likedUsers: Ref<UserClass>[]
+
     @prop({
         ref: () => UserClass,
         unique: false,
