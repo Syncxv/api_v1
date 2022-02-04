@@ -67,7 +67,7 @@ export class postReslover {
     async createPost(
         @Ctx() ctx: MyContext,
         @Arg('options') options: CreatePostArgs,
-        @Arg('image', () => GraphQLUpload)
+        @Arg('image', () => GraphQLUpload, { nullable: true })
         image?: FileUpload
     ): Promise<PostClass> {
         console.log(image)
