@@ -191,18 +191,28 @@ export class postReslover {
         if (!post) return { errors: [{ message: 'that post doesnt exist' }] }
         const isLiked = post.likedUsers.includes(user._id)
         if (isLiked) {
-            await post.update({
-                $pull: {
-                    likedUsers: user._id
-                }
-            })
+            const hehe = await PostModel.findByIdAndUpdate(
+                postId,
+                {
+                    $pull: {
+                        likedUsers: user._id
+                    }
+                },
+                { new: true }
+            )
             return {
-                post: await PostModel.populateModel(post)
+                post: await PostModel.populateModel(hehe!)
             }
         }
-        await post.update({ $push: { likedUsers: user._id } })
+        const hehe = await PostModel.findByIdAndUpdate(
+            postId,
+            {
+                $push: { likedUsers: user._id }
+            },
+            { new: true }
+        )
         return {
-            post: await PostModel.populateModel(post)
+            post: await PostModel.populateModel(hehe!)
         }
     }
     @Query(() => UserClass)
