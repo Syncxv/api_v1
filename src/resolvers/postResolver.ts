@@ -61,6 +61,10 @@ export class postReslover {
     async getPosts(): Promise<PostClass[]> {
         return await PostModel.findAndPopulate()
     }
+    @Query(() => PostClass, { nullable: true })
+    async getPost(@Arg('post_id') postId: string): Promise<PostClass | null> {
+        return await PostModel.findByIdAndPopulate(postId)
+    }
 
     @Mutation(() => PostClass)
     @UseMiddleware(isAuth)
