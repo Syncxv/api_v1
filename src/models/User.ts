@@ -1,7 +1,12 @@
-import { prop, getModelForClass, Ref } from '@typegoose/typegoose'
+import { prop, getModelForClass, Ref, pre } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ObjectType } from 'type-graphql'
 
+@pre<UserClass>('validate', function () {
+    if (!this.displayName) {
+        this.displayName = this.username
+    }
+})
 @ObjectType()
 export class UserClass extends TimeStamps {
     @Field()
@@ -16,6 +21,10 @@ export class UserClass extends TimeStamps {
     @prop({ required: true })
     @Field()
     public username: string
+
+    @prop({ required: false })
+    @Field()
+    public displayName: string
 
     @prop({ required: true })
     @Field()
