@@ -7,6 +7,12 @@ export class UserClass extends TimeStamps {
     @Field()
     readonly _id: string
 
+    @Field(() => Date, { nullable: true })
+    readonly createdAt?: Date | undefined
+
+    @Field(() => Date, { nullable: true })
+    readonly updatedAt?: Date | undefined
+
     @prop({ required: true })
     @Field()
     public username: string
