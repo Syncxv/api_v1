@@ -54,6 +54,13 @@ class CommentResponse {
     @Field(() => PostClass, { nullable: true })
     post?: PostClass
 }
+@ObjectType()
+class LikeCommentResponse {
+    @Field(() => [GenericError], { nullable: true })
+    errors?: GenericError[]
+    @Field(() => CommentClass, { nullable: true })
+    comment?: CommentClass
+}
 
 @Resolver(_ => PostModel)
 export class postReslover {
@@ -218,6 +225,41 @@ export class postReslover {
         console.log(populated)
         return {
             post: populated
+        }
+    }
+    @Mutation(() => LikeCommentResponse)
+    @UseMiddleware(isAuth)
+    async likeComment(
+        @Ctx() { payload: { user } }: MyContext,
+        @Arg('comment_id') commentId: string
+    ): Promise<LikeCommentResponse> {
+        const comment = await CommentModel.findById(commentId)
+        if (!comment)
+            return { errors: [{ message: 'that comment doesnt exist' }] }
+        const isLiked = comment.likedUsers.includes(user._id)
+        if (isLiked) {
+            const hehe = await CommentModel.findByIdAndUpdate(
+                commentId,
+                {
+                    $pull: {
+                        likedUsers: user._id
+                    }
+                },
+                { new: true }
+            )
+            return {
+                comment: await CommentModel.populateModel(hehe!)
+            }
+        }
+        const hehe = await CommentModel.findByIdAndUpdate(
+            commentId,
+            {
+                $push: { likedUsers: user._id }
+            },
+            { new: true }
+        )
+        return {
+            comment: await CommentModel.populateModel(hehe!)
         }
     }
     @Query(() => UserClass)
