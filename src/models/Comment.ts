@@ -1,5 +1,15 @@
-import { prop, getModelForClass, Ref } from '@typegoose/typegoose'
+import {
+    prop,
+    getModelForClass,
+    Ref,
+    ReturnModelType
+} from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
+import {
+    BeAnObject,
+    IObjectWithTypegooseFunction
+} from '@typegoose/typegoose/lib/types'
+import { Document } from 'mongoose'
 import { Field, ObjectType } from 'type-graphql'
 import { UserClass } from './User'
 
@@ -22,6 +32,10 @@ export class CommentClass extends TimeStamps {
     @Field()
     public likes: number
 
+    @prop({ ref: () => UserClass, required: false, default: [] })
+    @Field(() => [String])
+    public likedUsers: Ref<UserClass>[]
+
     @prop({
         ref: () => UserClass,
         unique: false,
@@ -30,6 +44,23 @@ export class CommentClass extends TimeStamps {
     })
     @Field(() => UserClass)
     public author: Ref<UserClass>
+
+    public static async findByIdAndPopulate(
+        this: ReturnModelType<typeof CommentClass>,
+        id: string
+    ) {
+        return this.findById(id).populate({ path: 'author' })
+    }
+    public static async populateModel(
+        this: ReturnModelType<typeof CommentClass>,
+        comment: Document<string, BeAnObject, any> &
+            CommentClass &
+            IObjectWithTypegooseFunction & {
+                _id: string
+            }
+    ) {
+        return await comment.populate({ path: 'author' })
+    }
 }
 
 export const CommentModel = getModelForClass(CommentClass, {
