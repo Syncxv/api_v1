@@ -5,12 +5,8 @@ import {
     ReturnModelType
 } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
-import {
-    BeAnObject,
-    IObjectWithTypegooseFunction
-} from '@typegoose/typegoose/lib/types'
-import { Document } from 'mongoose'
 import { Field, ObjectType } from 'type-graphql'
+import { MongoDocument } from '../types'
 import { CommentClass } from './Comment'
 import { UserClass } from './User'
 
@@ -86,11 +82,7 @@ export class PostClass extends TimeStamps {
 
     public static async populateModel(
         this: ReturnModelType<typeof PostClass>,
-        post: Document<string, BeAnObject, any> &
-            PostClass &
-            IObjectWithTypegooseFunction & {
-                _id: string
-            }
+        post: MongoDocument<PostClass>
     ) {
         return (
             await post.populate({

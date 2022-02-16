@@ -5,12 +5,8 @@ import {
     ReturnModelType
 } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
-import {
-    BeAnObject,
-    IObjectWithTypegooseFunction
-} from '@typegoose/typegoose/lib/types'
-import { Document } from 'mongoose'
 import { Field, ObjectType } from 'type-graphql'
+import { MongoDocument } from '../types'
 import { UserClass } from './User'
 
 @ObjectType()
@@ -23,6 +19,10 @@ export class CommentClass extends TimeStamps {
 
     @Field(() => Date, { nullable: true })
     readonly updatedAt?: Date | undefined
+
+    @prop({ required: false })
+    @Field({ nullable: true })
+    public attachment: string
 
     @prop({ required: true })
     @Field()
@@ -53,11 +53,7 @@ export class CommentClass extends TimeStamps {
     }
     public static async populateModel(
         this: ReturnModelType<typeof CommentClass>,
-        comment: Document<string, BeAnObject, any> &
-            CommentClass &
-            IObjectWithTypegooseFunction & {
-                _id: string
-            }
+        comment: MongoDocument<CommentClass>
     ) {
         return await comment.populate({ path: 'author' })
     }

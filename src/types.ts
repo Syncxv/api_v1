@@ -1,3 +1,8 @@
+import {
+    BeAnObject,
+    IObjectWithTypegooseFunction
+} from '@typegoose/typegoose/lib/types'
+import { Document } from 'mongoose'
 import { Request, Response } from 'express'
 import { UserClass } from './models/User'
 
@@ -13,3 +18,9 @@ export enum Feilds {
     EMAIL = 'email',
     UNKOWN = 'unkown'
 }
+
+export type MongoDocument<T> = Document<string, BeAnObject, any> &
+    T &
+    IObjectWithTypegooseFunction & {
+        _id: string
+    }
