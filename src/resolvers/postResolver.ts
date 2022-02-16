@@ -119,6 +119,41 @@ export class postReslover {
             post
         }
     }
+
+    @Mutation(() => LikePostResponse)
+    @UseMiddleware(isAuth)
+    async likePost(
+        @Ctx() { payload: { user } }: MyContext,
+        @Arg('post_id') postId: string
+    ): Promise<LikePostResponse> {
+        const post = await PostModel.findById(postId)
+        if (!post) return { errors: [{ message: 'that post doesnt exist' }] }
+        const isLiked = post.likedUsers.includes(user._id)
+        if (isLiked) {
+            const hehe = await PostModel.findByIdAndUpdate(
+                postId,
+                {
+                    $pull: {
+                        likedUsers: user._id
+                    }
+                },
+                { new: true }
+            )
+            return {
+                post: await PostModel.populateModel(hehe!)
+            }
+        }
+        const hehe = await PostModel.findByIdAndUpdate(
+            postId,
+            {
+                $push: { likedUsers: user._id }
+            },
+            { new: true }
+        )
+        return {
+            post: await PostModel.populateModel(hehe!)
+        }
+    }
     @Mutation(() => CommentResponse)
     @UseMiddleware(isAuth)
     async addComment(
@@ -183,40 +218,6 @@ export class postReslover {
         console.log(populated)
         return {
             post: populated
-        }
-    }
-    @Mutation(() => LikePostResponse)
-    @UseMiddleware(isAuth)
-    async likePost(
-        @Ctx() { payload: { user } }: MyContext,
-        @Arg('post_id') postId: string
-    ): Promise<LikePostResponse> {
-        const post = await PostModel.findById(postId)
-        if (!post) return { errors: [{ message: 'that post doesnt exist' }] }
-        const isLiked = post.likedUsers.includes(user._id)
-        if (isLiked) {
-            const hehe = await PostModel.findByIdAndUpdate(
-                postId,
-                {
-                    $pull: {
-                        likedUsers: user._id
-                    }
-                },
-                { new: true }
-            )
-            return {
-                post: await PostModel.populateModel(hehe!)
-            }
-        }
-        const hehe = await PostModel.findByIdAndUpdate(
-            postId,
-            {
-                $push: { likedUsers: user._id }
-            },
-            { new: true }
-        )
-        return {
-            post: await PostModel.populateModel(hehe!)
         }
     }
     @Query(() => UserClass)
