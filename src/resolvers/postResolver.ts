@@ -164,9 +164,11 @@ export class postReslover {
     @Mutation(() => CommentResponse)
     @UseMiddleware(isAuth)
     async addComment(
-        @Ctx() { payload }: MyContext,
+        @Ctx() ctx: MyContext,
         @Arg('content') content: string,
-        @Arg('post_id') postId: string
+        @Arg('post_id') postId: string,
+        @Arg('image', () => GraphQLUpload, { nullable: true })
+        image?: FileUpload
     ): Promise<CommentResponse> {
         if (!content.length)
             return { errors: [{ message: 'ayooo thats an empty comment' }] }
@@ -175,16 +177,28 @@ export class postReslover {
             return {
                 errors: [{ message: 'WHAT POST IS THAT?' }]
             }
-        const comment = await CommentModel.create({
-            content,
-            author: payload.user._id
-        })
-        post.comments.push(comment)
-        console.log(post, comment)
-        ;(global as any).post = post
-        ;(global as any).comment = comment
-        await comment.save()
-        await post.save()
+        if (image) {
+            const imageUrl = await saveImage(image, ctx)
+            const comment = await CommentModel.create({
+                content,
+                attachment: imageUrl,
+                author: ctx.payload.user._id
+            })
+            post.comments.push(comment)
+            console.log(post, comment)
+            await comment.save()
+            await post.save()
+        } else {
+            const comment = await CommentModel.create({
+                content,
+                author: ctx.payload.user._id
+            })
+            post.comments.push(comment)
+            console.log(post, comment)
+            await comment.save()
+            await post.save()
+        }
+
         return {
             post: await PostModel.populateModel(post)
         }
