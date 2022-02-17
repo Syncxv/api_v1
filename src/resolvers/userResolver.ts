@@ -118,6 +118,7 @@ export class userReslover {
         const hash = await argon.hash(password)
         const user = await UserModel.create({
             username,
+            displayName: username,
             email,
             password: hash
         })
