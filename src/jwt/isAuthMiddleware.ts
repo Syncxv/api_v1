@@ -1,3 +1,4 @@
+import { AuthenticationError } from 'apollo-server-express'
 import { verify } from 'jsonwebtoken'
 import { MiddlewareFn } from 'type-graphql'
 import { MyContext } from '../types'
@@ -5,7 +6,7 @@ import { MyContext } from '../types'
 export const isAuth: MiddlewareFn<MyContext> = async ({ context }, next) => {
     const auth = context.req.headers['authorization']
     if (!auth) {
-        throw new Error('no authorization token')
+        throw new AuthenticationError('no authorization token')
     }
     try {
         const payload = verify(
@@ -15,7 +16,7 @@ export const isAuth: MiddlewareFn<MyContext> = async ({ context }, next) => {
         context.payload = payload as any
     } catch (err) {
         console.log(err)
-        throw new Error('didnt work :|')
+        throw new AuthenticationError('didnt work :|')
     }
     return next()
 }
