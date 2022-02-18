@@ -66,6 +66,7 @@ class LikeCommentResponse {
 export class postReslover {
     @Query(() => [PostClass])
     async getPosts(): Promise<PostClass[]> {
+        PostModel.find
         return await PostModel.findAndPopulate()
     }
     @Query(() => PostClass, { nullable: true })
@@ -73,10 +74,19 @@ export class postReslover {
         return await PostModel.findByIdAndPopulate(postId)
     }
     @Query(() => [PostClass], { nullable: true })
-    async getUserPosts(@Arg('user_id') userId: string) {
-        return await PostModel.findAndPopulate({
+    async getUserPosts(
+        @Arg('user_id') userId: string,
+        @Arg('limit', { nullable: true }) limit?: number
+    ) {
+        return PostModel.find({
             owner: { _id: userId }
         })
+            .populate({
+                path: 'owner'
+            })
+            .populate({ path: 'comments', populate: { path: 'author' } })
+            .sort({ $natural: -1 })
+            .limit(limit || 10)
     }
     @Mutation(() => PostClass)
     @UseMiddleware(isAuth)
