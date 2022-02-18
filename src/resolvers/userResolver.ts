@@ -244,14 +244,18 @@ export class userReslover {
         @Ctx() { payload }: MyContext,
         @Arg('user_id') userId: string
     ): Promise<FollowRequestResponse> {
-        const user = await UserModel.findById(userId).populate({
-            path: 'followers'
+        const user = await UserModel.findByIdAndUpdate(
+            userId,
+            { $pull: { followers: payload.user._id } },
+            { new: true }
+        ).populate({
+            path: 'followers',
+            select: ['username', 'id']
         })
         if (!user) {
             return { errors: [{ message: 'who is that eh' }] }
         }
-        await user.update({ $pull: { followers: payload.user._id } })
-        await user.save()
+
         return {
             user: user
         }
