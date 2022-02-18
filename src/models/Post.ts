@@ -61,9 +61,10 @@ export class PostClass extends TimeStamps {
     public comments: Ref<CommentClass>[]
 
     public static async findAndPopulate(
-        this: ReturnModelType<typeof PostClass>
+        this: ReturnModelType<typeof PostClass>,
+        query?: any
     ) {
-        return this.find()
+        return this.find(query || {})
             .populate({
                 path: 'owner'
             })
