@@ -76,6 +76,15 @@ export class userReslover {
             select: ['username', 'id']
         })
     }
+    @Query(() => UserClass, { nullable: true })
+    async findUser(
+        @Arg('username') username: string
+    ): Promise<UserClass | null> {
+        return await UserModel.findOne({ username }).populate({
+            path: 'followers',
+            select: ['username', 'id']
+        })
+    }
     @Mutation(() => UserAuthResponse)
     async userRegister(
         @Arg('options') options: UserRegisterArgs
