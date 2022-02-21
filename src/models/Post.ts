@@ -2,14 +2,19 @@ import {
     prop,
     getModelForClass,
     Ref,
-    ReturnModelType
+    ReturnModelType,
+    pre
 } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ObjectType } from 'type-graphql'
 import { MongoDocument } from '../types'
 import { CommentClass } from './Comment'
 import { UserClass } from './User'
-
+@pre<PostClass>('save', function () {
+    const pls = this.get('likedUsers')
+    console.log(pls)
+    this.likes = this.get('likedUsers').length
+})
 @ObjectType()
 export class PostClass extends TimeStamps {
     @Field()
@@ -62,28 +67,39 @@ export class PostClass extends TimeStamps {
 
     public static async findAndPopulate(
         this: ReturnModelType<typeof PostClass>,
-        query?: any
+        query?: any,
+        commentLimit?: number
     ) {
-        return this.find(query || {})
+        return await this.find(query || {})
             .populate({
                 path: 'owner'
             })
-            .populate({ path: 'comments', populate: { path: 'author' } })
+            .populate({
+                path: 'comments',
+                populate: { path: 'author' },
+                options: { limit: commentLimit || 10 }
+            })
     }
     public static async findByIdAndPopulate(
         this: ReturnModelType<typeof PostClass>,
-        id: string
+        id: string,
+        commentLimit?: number
     ) {
         return this.findById(id)
             .populate({
                 path: 'owner'
             })
-            .populate({ path: 'comments', populate: { path: 'author' } })
+            .populate({
+                path: 'comments',
+                populate: { path: 'author' },
+                options: { limit: commentLimit || 10 }
+            })
     }
 
     public static async populateModel(
         this: ReturnModelType<typeof PostClass>,
-        post: MongoDocument<PostClass>
+        post: MongoDocument<PostClass>,
+        commentLimit?: number
     ) {
         return (
             await post.populate({
@@ -91,7 +107,8 @@ export class PostClass extends TimeStamps {
             })
         ).populate({
             path: 'comments',
-            populate: { path: 'author' }
+            populate: { path: 'author' },
+            options: { limit: commentLimit || 10 }
         })
     }
 }
