@@ -11,9 +11,8 @@ import { MongoDocument } from '../types'
 import { CommentClass } from './Comment'
 import { UserClass } from './User'
 @pre<PostClass>('save', function () {
-    const pls = this.get('likedUsers')
-    console.log(pls)
     this.likes = this.get('likedUsers').length
+    this.commentCount = this.get('comments').length
 })
 @ObjectType()
 export class PostClass extends TimeStamps {
@@ -64,6 +63,10 @@ export class PostClass extends TimeStamps {
     })
     @Field(() => [CommentClass])
     public comments: Ref<CommentClass>[]
+
+    @Field()
+    @prop({ required: false, default: 0 })
+    public commentCount: number
 
     public static async findAndPopulate(
         this: ReturnModelType<typeof PostClass>,
