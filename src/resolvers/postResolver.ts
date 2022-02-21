@@ -291,6 +291,38 @@ export class postReslover {
             comment: await CommentModel.populateModel(hehe!)
         }
     }
+
+    @Query(() => [CommentClass])
+    // @UseMiddleware(isAuth)
+    async getCommentsAfter(
+        // @Ctx() { payload }: MyContext,
+        @Arg('post_id') postId: string,
+        @Arg('after_id') afterId: string
+    ) {
+        const post = await PostModel.findById(postId)
+        if (!post) return { errors: [{ message: 'WHAT POST IS THAT' }] }
+        const after = await CommentModel.findById(afterId)
+        if (!after) return { errors: [{ message: 'WHAT COMMENT IS THAT' }] }
+        const index = post.comments.indexOf(after._id) + 1
+        const aggPost: [PostClass & { items: CommentClass[] }] =
+            (await PostModel.aggregate([
+                { $match: { _id: post._id } },
+                {
+                    $addFields: {
+                        items: {
+                            $slice: ['$comments', index, post.comments.length]
+                        }
+                    }
+                }
+            ])) as any
+        console.log(aggPost)
+        return await Promise.all(
+            aggPost[0].items.map(
+                async (s: any) => await CommentModel.findByIdAndPopulate(s)
+            )
+        )
+    }
+
     @Query(() => UserClass)
     @UseMiddleware(isAuth)
     postAuth(@Ctx() { payload }: MyContext) {
