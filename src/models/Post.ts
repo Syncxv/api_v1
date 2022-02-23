@@ -7,6 +7,7 @@ import {
 } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ObjectType } from 'type-graphql'
+import { defaultLimit } from '../constants'
 import { MongoDocument } from '../types'
 import { CommentClass } from './Comment'
 import { UserClass } from './User'
@@ -80,7 +81,7 @@ export class PostClass extends TimeStamps {
             .populate({
                 path: 'comments',
                 populate: { path: 'author' },
-                options: { limit: commentLimit || 10 }
+                options: { limit: commentLimit || defaultLimit }
             })
     }
     public static async findByIdAndPopulate(
@@ -95,7 +96,7 @@ export class PostClass extends TimeStamps {
             .populate({
                 path: 'comments',
                 populate: { path: 'author' },
-                options: { limit: commentLimit || 10 }
+                options: { limit: commentLimit || defaultLimit }
             })
     }
 
@@ -111,7 +112,7 @@ export class PostClass extends TimeStamps {
         ).populate({
             path: 'comments',
             populate: { path: 'author' },
-            options: { limit: commentLimit || 10 }
+            options: { limit: commentLimit || defaultLimit }
         })
     }
 }

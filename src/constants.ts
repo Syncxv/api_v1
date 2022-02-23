@@ -15,3 +15,4 @@ export const corsOptions = {
 }
 
 export const apiUrl = process.env.APIRUL || 'http://localhost:8000'
+export const defaultLimit = 10
