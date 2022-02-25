@@ -25,6 +25,14 @@ export class ChannelClass extends TimeStamps {
             path: 'members'
         })
     }
+    public static async findOneAndPopulate(
+        this: ReturnModelType<typeof ChannelClass>,
+        query: any
+    ) {
+        return await this.findOne(query).populate({
+            path: 'members'
+        })
+    }
 }
 
 export const ChannelModel = getModelForClass(ChannelClass, {
