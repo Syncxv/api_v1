@@ -9,6 +9,7 @@ import { buildSchema } from 'type-graphql'
 import { TypegooseMiddleware } from './typegoose-middleware'
 import { graphqlUploadExpress } from 'graphql-upload'
 import path from 'path'
+import cookieParser from 'cookie-parser'
 
 import resolvers from './resolvers'
 import { PostModel, CommentModel, UserModel } from './models'
@@ -17,12 +18,14 @@ import { socketAuth } from './socket/middleware/socketAuth'
 import listeners from './socket/listeners'
 import { ChannelModel } from './models/Channel'
 import { MessageModel } from './models/Message'
+import { corsOptions } from './constants'
 const PORT = process.env.PORT || 8000
 const main = async () => {
     const app = express()
     app.use(express.static(path.join('public')))
     app.use(graphqlUploadExpress({ maxFileSize: 8000000, maxFiles: 10 }))
-    app.use(cors())
+    app.use(cors(corsOptions))
+    app.use(cookieParser())
     mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/sma')
     const db = mongoose.connection
     db.on('error', err => console.error(err))
@@ -48,7 +51,7 @@ const main = async () => {
         context: ({ req, res }) => ({ req, res, io })
     })
     await apollo.start()
-    apollo.applyMiddleware({ app })
+    apollo.applyMiddleware({ app, cors: corsOptions })
 }
 
 main().catch(err => console.error(err))

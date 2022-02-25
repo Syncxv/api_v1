@@ -15,6 +15,7 @@ import argon from 'argon2'
 import { createAcessToken } from '../jwt'
 import { isAuth } from '../jwt/isAuthMiddleware'
 import { Feilds, MyContext } from '../types'
+import { COOKIE_NAME, JWT_AGE } from '../constants'
 
 @InputType()
 class UserRegisterArgs {
@@ -87,6 +88,7 @@ export class userReslover {
     }
     @Mutation(() => UserAuthResponse)
     async userRegister(
+        @Ctx() { res }: MyContext,
         @Arg('options') options: UserRegisterArgs
     ): Promise<UserAuthResponse> {
         const { username, email, password } = options
@@ -145,13 +147,21 @@ export class userReslover {
             }
         }
         console.log(user)
+        const accessToken = createAcessToken(user)
+        res.cookie(COOKIE_NAME, accessToken, {
+            httpOnly: true,
+            maxAge: JWT_AGE.int
+        })
         return {
             user,
-            accessToken: createAcessToken(user)
+            accessToken
         }
     }
     @Mutation(() => UserAuthResponse)
-    async userLogin(@Arg('options') options: UserLoginArgs) {
+    async userLogin(
+        @Ctx() { res }: MyContext,
+        @Arg('options') options: UserLoginArgs
+    ) {
         const user = await UserModel.findOne({
             username: options.username
         }).select('+password')
@@ -177,9 +187,14 @@ export class userReslover {
                 ]
             }
         }
+        const accessToken = createAcessToken(user)
+        res.cookie(COOKIE_NAME, accessToken, {
+            httpOnly: true,
+            maxAge: JWT_AGE.int
+        })
         return {
             user,
-            accessToken: createAcessToken(user)
+            accessToken
         }
     }
     @Mutation(() => Boolean)
