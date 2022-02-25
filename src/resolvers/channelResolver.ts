@@ -1,9 +1,20 @@
-import { Arg, Field, Mutation, ObjectType, Query, Resolver } from 'type-graphql'
+import {
+    Arg,
+    Ctx,
+    Field,
+    Mutation,
+    ObjectType,
+    Query,
+    Resolver,
+    UseMiddleware
+} from 'type-graphql'
+import { isAuth } from '../jwt/isAuthMiddleware'
 import { UserModel } from '../models'
 import { ChannelClass, ChannelModel } from '../models/Channel'
+import { MyContext } from '../types'
 import { GenericError } from './userResolver'
 @ObjectType()
-class CreateChannelResponse {
+class GenericChannelResponse {
     @Field(() => [GenericError], { nullable: true })
     errors?: GenericError[]
     @Field(() => ChannelClass, { nullable: true })
@@ -17,10 +28,10 @@ export class ChannelResolver {
         return await ChannelModel.findAndPopulate()
     }
 
-    @Mutation(() => CreateChannelResponse)
+    @Mutation(() => GenericChannelResponse)
     async createChannel(
         @Arg('members', () => [String]) members: string[]
-    ): Promise<CreateChannelResponse> {
+    ): Promise<GenericChannelResponse> {
         const users = await Promise.all(
             members.map(async s => await UserModel.findByIdAndPopulate(s))
         )
@@ -42,5 +53,13 @@ export class ChannelResolver {
         return {
             channel
         }
+    }
+
+    @Query(() => [ChannelClass])
+    @UseMiddleware(isAuth)
+    async getChannels(@Ctx() ctx: MyContext): Promise<ChannelClass[]> {
+        return await ChannelModel.findAndPopulate({
+            members: { $in: [ctx.payload.user._id] }
+        })
     }
 }
