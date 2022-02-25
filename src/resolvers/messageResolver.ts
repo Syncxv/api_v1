@@ -1,33 +1,48 @@
 import {
     Arg,
     Ctx,
+    Field,
     Mutation,
+    ObjectType,
     Query,
     Resolver,
     UseMiddleware
 } from 'type-graphql'
+
 import { isAuth } from '../jwt/isAuthMiddleware'
+import { ChannelModel } from '../models/Channel'
 import { MessageClass, MessageModel } from '../models/Message'
 import { MyContext } from '../types'
+import { GenericError } from './userResolver'
+
+@ObjectType()
+class GenericMessageResponse {
+    @Field(() => [GenericError], { nullable: true })
+    errors?: GenericError[]
+    @Field(() => MessageClass, { nullable: true })
+    message?: MessageClass
+}
+
 @Resolver(_ => MessageClass)
 export class MessageResolver {
-    @Mutation(() => MessageClass)
+    @Mutation(() => GenericMessageResponse)
     @UseMiddleware(isAuth)
     async createMessage(
         @Ctx() { payload: { user } }: MyContext,
         @Arg('channel_id') channelId: string,
         @Arg('content') content: string
-    ): Promise<MessageClass> {
+    ): Promise<GenericMessageResponse> {
+        const channel = ChannelModel.findById(channelId)
+        if (!channel)
+            return { errors: [{ message: 'welp that channel doesnt exist' }] }
         const message = await MessageModel.create({
             channel: channelId,
             content,
             author: user._id
         })
-        console.log(message)
-        return await message.populate([
-            { path: 'author' },
-            { path: 'channel', populate: { path: 'members' } }
-        ])
+        const populated = await MessageModel.populateModel(message)
+        // io
+        return { message: populated }
     }
 
     @Query(() => [MessageClass])
@@ -42,7 +57,7 @@ export class MessageResolver {
             const messages = await MessageModel.find({
                 channel: channelId
             })
-                .sort({ $natural: -1 })
+                // .sort({ $natural: -1 })
                 .limit(limit || 50)
             return MessageModel.populateModels(messages)
         }
