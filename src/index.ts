@@ -16,6 +16,7 @@ import { listen } from './socket'
 import { socketAuth } from './socket/middleware/socketAuth'
 import listeners from './socket/listeners'
 import { ChannelModel } from './models/Channel'
+import { MessageModel } from './models/Message'
 const PORT = process.env.PORT || 8000
 const main = async () => {
     const app = express()
@@ -30,6 +31,7 @@ const main = async () => {
     ;(global as any).CommentModel = CommentModel
     ;(global as any).UserModel = UserModel
     ;(global as any).ChannelModel = ChannelModel
+    ;(global as any).MessageModel = MessageModel
     ;(global as any).path = path
     const server = app.listen(PORT, () =>
         console.log(`listening on port ${PORT} url: http://localhost:${PORT}`)
