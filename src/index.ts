@@ -6,12 +6,15 @@ import mongoose from 'mongoose'
 import cors from 'cors'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
-
-import resolvers from './resolvers'
 import { TypegooseMiddleware } from './typegoose-middleware'
-import { PostModel, CommentModel, UserModel } from './models'
 import { graphqlUploadExpress } from 'graphql-upload'
 import path from 'path'
+
+import resolvers from './resolvers'
+import { PostModel, CommentModel, UserModel } from './models'
+import { listen } from './socket'
+import { socketAuth } from './socket/middleware/socketAuth'
+import listeners from './socket/listeners'
 const PORT = process.env.PORT || 8000
 const main = async () => {
     const app = express()
@@ -26,19 +29,22 @@ const main = async () => {
     ;(global as any).CommentModel = CommentModel
     ;(global as any).UserModel = UserModel
     ;(global as any).path = path
+    const server = app.listen(PORT, () =>
+        console.log(`listening on port ${PORT} url: http://localhost:${PORT}`)
+    )
+    const io = listen(server)
+    io.use(socketAuth)
+    listeners.forEach(s => s(io))
     const apollo = new ApolloServer({
         schema: await buildSchema({
             resolvers: Object.values(resolvers) as any,
             globalMiddlewares: [TypegooseMiddleware],
             validate: false
         }),
-        context: ({ req, res }) => ({ req, res })
+        context: ({ req, res }) => ({ req, res, io })
     })
     await apollo.start()
     apollo.applyMiddleware({ app })
-    app.listen(PORT, () =>
-        console.log(`listening on port ${PORT} url: http://localhost:${PORT}`)
-    )
 }
 
 main().catch(err => console.error(err))
