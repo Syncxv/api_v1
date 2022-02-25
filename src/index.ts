@@ -15,6 +15,7 @@ import { PostModel, CommentModel, UserModel } from './models'
 import { listen } from './socket'
 import { socketAuth } from './socket/middleware/socketAuth'
 import listeners from './socket/listeners'
+import { ChannelModel } from './models/Channel'
 const PORT = process.env.PORT || 8000
 const main = async () => {
     const app = express()
@@ -28,6 +29,7 @@ const main = async () => {
     ;(global as any).PostModel = PostModel
     ;(global as any).CommentModel = CommentModel
     ;(global as any).UserModel = UserModel
+    ;(global as any).ChannelModel = ChannelModel
     ;(global as any).path = path
     const server = app.listen(PORT, () =>
         console.log(`listening on port ${PORT} url: http://localhost:${PORT}`)
