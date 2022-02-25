@@ -278,7 +278,7 @@ export class userReslover {
     @Query(() => UserClass)
     @UseMiddleware(isAuth)
     async me(@Ctx() { payload }: MyContext): Promise<UserClass> {
-        console.log(payload)
-        return payload.user
+        const bruh = await UserModel.findByIdAndPopulate(payload.user._id)!
+        return bruh!
     }
 }
