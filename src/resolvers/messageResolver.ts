@@ -8,10 +8,12 @@ import {
     Resolver,
     UseMiddleware
 } from 'type-graphql'
+import { SOCKET_ACTIONS } from '../constants'
 
 import { isAuth } from '../jwt/isAuthMiddleware'
 import { ChannelModel } from '../models/Channel'
 import { MessageClass, MessageModel } from '../models/Message'
+import { usersMap } from '../socket/listeners/mainListner'
 import { MyContext } from '../types'
 import { GenericError } from './userResolver'
 
@@ -28,11 +30,11 @@ export class MessageResolver {
     @Mutation(() => GenericMessageResponse)
     @UseMiddleware(isAuth)
     async createMessage(
-        @Ctx() { payload: { user } }: MyContext,
+        @Ctx() { payload: { user }, io }: MyContext,
         @Arg('channel_id') channelId: string,
         @Arg('content') content: string
     ): Promise<GenericMessageResponse> {
-        const channel = ChannelModel.findById(channelId)
+        const channel = await ChannelModel.findById(channelId)
         if (!channel)
             return { errors: [{ message: 'welp that channel doesnt exist' }] }
         const message = await MessageModel.create({
@@ -41,7 +43,17 @@ export class MessageResolver {
             author: user._id
         })
         const populated = await MessageModel.populateModel(message)
-        // io
+        console.log(usersMap)
+        const recipiant = usersMap.get(
+            channel.members.find(s => s?.toString() !== user._id)?.toString() ||
+                'well'
+        )
+        if (recipiant) {
+            io.to(recipiant.socketId).emit(
+                SOCKET_ACTIONS.RECIVE_MESSAGE,
+                message
+            )
+        }
         return { message: populated }
     }
 

@@ -20,3 +20,8 @@ export const JWT_AGE = {
     string: '10h',
     int: 3.6e7
 }
+
+export enum SOCKET_ACTIONS {
+    USER_UPDATE = 'user-update',
+    RECIVE_MESSAGE = 'recive-message'
+}
