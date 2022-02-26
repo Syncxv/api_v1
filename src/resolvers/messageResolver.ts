@@ -69,9 +69,10 @@ export class MessageResolver {
             const messages = await MessageModel.find({
                 channel: channelId
             })
-                // .sort({ $natural: -1 })
+                .sort({ $natural: -1 })
                 .limit(limit || 50)
-            return MessageModel.populateModels(messages)
+            console.log(messages)
+            return await (await MessageModel.populateModels(messages)).reverse()
         }
         return []
     }

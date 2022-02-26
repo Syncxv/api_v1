@@ -37,6 +37,16 @@ export class MessageClass extends TimeStamps {
     @Field(() => UserClass)
     public author: Ref<UserClass>
 
+    public static async findAndPopulate(
+        this: ReturnModelType<typeof MessageClass>,
+        query?: any
+    ) {
+        return await this.find(query || {}).populate([
+            { path: 'author' },
+            { path: 'channel', populate: { path: 'members' } }
+        ])
+    }
+
     public static async populateModel(
         this: ReturnModelType<typeof MessageClass>,
         message: MongoDocument<MessageClass>
