@@ -58,17 +58,12 @@ export class MessageClass extends TimeStamps {
     }
     public static async populateModels(
         this: ReturnModelType<typeof MessageClass>,
-        messages: MongoDocument<MessageClass>[]
+        messages: MongoDocument<MessageClass>[] | MessageClass[]
     ) {
-        return await Promise.all(
-            messages.map(
-                async s =>
-                    await s.populate([
-                        { path: 'author' },
-                        { path: 'channel', populate: { path: 'members' } }
-                    ])
-            )
-        )
+        return await MessageModel.populate(messages, [
+            { path: 'author' },
+            { path: 'channel', populate: { path: 'members' } }
+        ])
     }
 }
 
