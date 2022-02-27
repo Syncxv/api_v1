@@ -78,9 +78,7 @@ export class MessageResolver {
         const messages = await MessageModel.aggregate([
             { $match: { _id: { $lt: message._id } } }
         ]).limit(limit || 50)
-        const realMessages = await (
-            await MessageModel.populateModels(messages)
-        ).reverse()
+        const realMessages = await MessageModel.populateModels(messages)
         return realMessages
     }
 }
